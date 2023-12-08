@@ -1,10 +1,13 @@
 import os
-
+import re
 import torch
 from torch.utils.data import Dataset
 import pandas as pd
 import torchaudio
 
+
+ANNOTATIONS_FILE = "/home/navid/Desktop/data_spotify/songs.csv"
+AUDIO_DIR = "/home/navid/Desktop/data_spotify/wav"
 
 class UrbanSoundDataset(Dataset):
 
@@ -24,17 +27,27 @@ class UrbanSoundDataset(Dataset):
 
     def __len__(self):
         return len(self.annotations)
-
+    
     def __getitem__(self, index):
-        audio_sample_path = self._get_audio_sample_path(index)
-        label = self._get_audio_sample_label(index)
-        signal, sr = torchaudio.load(audio_sample_path)
+        row = self.annotations.iloc[index]
+        song_title = row['name']
+        song_title_sanitized = re.sub(r'\s*\(.*?\)\s*', ' ', song_title).strip()
+        files = os.listdir(AUDIO_DIR)
+        audio_file_path = None
+        for file in files:
+            if song_title_sanitized in file:
+                audio_file_path = os.path.join(AUDIO_DIR, file)
+                break
+        if not audio_file_path:
+            raise FileNotFoundError(f"No audio file found for song title '{song_title_sanitized}'")
+        signal, sr = torchaudio.load(audio_file_path)
         signal = signal.to(self.device)
         signal = self._resample_if_necessary(signal, sr)
         signal = self._mix_down_if_necessary(signal)
         signal = self._cut_if_necessary(signal)
         signal = self._right_pad_if_necessary(signal)
         signal = self.transformation(signal)
+        label = row['popularity']  # Replace 'label_column' with the actual column name that contains the label
         return signal, label
 
     def _cut_if_necessary(self, signal):
@@ -72,11 +85,8 @@ class UrbanSoundDataset(Dataset):
 
 
 if __name__ == "__main__":
-    ANNOTATIONS_FILE = "/home/navid/Desktop/UrbanSound8K/metadata/UrbanSound8K.csv"
-    AUDIO_DIR = "/home/navid/Desktop/UrbanSound8K/audio"
-    SAMPLE_RATE = 22050
-    NUM_SAMPLES = 22050
-
+    SAMPLE_RATE = 964
+    NUM_SAMPLES = 964
     if torch.cuda.is_available():
         device = "cuda"
     else:
@@ -89,7 +99,6 @@ if __name__ == "__main__":
         hop_length=512,
         n_mels=64
     )
-
     usd = UrbanSoundDataset(ANNOTATIONS_FILE,
                             AUDIO_DIR,
                             mel_spectrogram,
@@ -98,4 +107,3 @@ if __name__ == "__main__":
                             device)
     print(f"There are {len(usd)} samples in the dataset.")
     signal, label = usd[0]
-

@@ -52,7 +52,7 @@ class CNNNetwork(nn.Module):
             nn.MaxPool2d(kernel_size=2)
         )
         self.flatten = nn.Flatten()
-        self.linear = nn.Linear(128 * 5 * 4, 10)
+        self.linear = nn.Linear(1280, 10)
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, input_data):
@@ -65,8 +65,6 @@ class CNNNetwork(nn.Module):
         predictions = self.softmax(logits)
         return predictions
 
-
 if __name__ == "__main__":
     cnn = CNNNetwork()
     summary(cnn.cuda(), (1, 64, 44))
-

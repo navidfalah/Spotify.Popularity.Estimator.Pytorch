@@ -1,63 +1,35 @@
 import torch
 import torchaudio
-
 from cnn import CNNNetwork
 from urbansounddataset import UrbanSoundDataset
 from train import AUDIO_DIR, ANNOTATIONS_FILE, SAMPLE_RATE, NUM_SAMPLES
 
+def load_model(model_path):
+    model = CNNNetwork()
+    state_dict = torch.load(model_path)
+    model.load_state_dict(state_dict)
+    return model
 
-class_mapping = [
-    "air_conditioner",
-    "car_horn",
-    "children_playing",
-    "dog_bark",
-    "drilling",
-    "engine_idling",
-    "gun_shot",
-    "jackhammer",
-    "siren",
-    "street_music"
-]
-
-
-def predict(model, input, target, class_mapping):
-    model.eval()
-    with torch.no_grad():
-        predictions = model(input)
-        # Tensor (1, 10) -> [ [0.1, 0.01, ..., 0.6] ]
-        print(predictions)
-        predicted_index = predictions[0].argmax(0)
-        predicted = class_mapping[predicted_index]
-        expected = class_mapping[target]
-    return predicted, expected
-
-
-if __name__ == "__main__":
-    # load back the model
-    cnn = CNNNetwork()
-    state_dict = torch.load("feedforwardnet.pth")
-    cnn.load_state_dict(state_dict)
-
-    # load urban sound dataset dataset
+def prepare_dataset():
     mel_spectrogram = torchaudio.transforms.MelSpectrogram(
         sample_rate=SAMPLE_RATE,
         n_fft=1024,
         hop_length=512,
         n_mels=64
     )
+    return UrbanSoundDataset(ANNOTATIONS_FILE, AUDIO_DIR, mel_spectrogram, SAMPLE_RATE, NUM_SAMPLES, "cpu")
 
-    usd = UrbanSoundDataset(ANNOTATIONS_FILE,
-                            AUDIO_DIR,
-                            mel_spectrogram,
-                            SAMPLE_RATE,
-                            NUM_SAMPLES,
-                            "cpu")
-
-    # get a sample from the urban sound dataset for inference
-    input, target = usd[0][0], usd[0][1] # [batch size, num_channels, fr, time]
+def make_inference(model, dataset, index):
+    input, target = dataset[index][0], dataset[index][1]
     input.unsqueeze_(0)
-   
-    # make an inference
-    predicted, expected = predict(cnn, input, target,
-                                  class_mapping)
+    output = model(input)
+    predicted_class = torch.argmax(output, dim=1)
+    return predicted_class.item(), target
+
+if __name__ == "__main__":
+    cnn = load_model("songnet.pth")
+    print(cnn)
+    usd = prepare_dataset()
+    print(len(usd))
+    predicted, expected = make_inference(cnn, usd, 300)
     print(f"Predicted: '{predicted}', expected: '{expected}'")
