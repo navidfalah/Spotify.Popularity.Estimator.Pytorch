@@ -1,15 +1,15 @@
 # Audio Neural Processing for Spotify Songs
 
 ## Overview
-This project is an extension of the Spotify Data Collector, focusing on advanced signal processing of the captured songs using PyTorch and torchaudio. It leverages the data and features obtained from [Spotify Popularity Estimator Data Capture](https://github.com/navidfalah/Spotify-Popularity-Estimator-DataCapture). The primary objective is to preprocess the audio data, apply neural network models for analysis, and predict the efficiency of songs.
+This project extends the Spotify Data Collector, focusing on advanced signal processing of captured songs using PyTorch and torchaudio. It utilizes data and features from [Spotify Popularity Estimator Data Capture](https://github.com/navidfalah/Spotify-Popularity-Estimator-DataCapture). The goal is to preprocess audio data, apply neural network models for analysis, and predict song efficiency.
 
 ## Features
-- **Data Cleaning:** Cleanses and aligns data where song names did not match initially.
-- **Format Conversion:** Converts audio files from MP3 to WAV for enhanced processing with torchaudio.
-- **Neural Network Processing:** Includes a class to fetch data from the database, process the signal through a neural network, and predict song efficiency.
-- **Model Training:** The project contains a trained model, with plans for further refinement and development.
-- **Future Enhancements:** Plans to increase neural network layers, remove noise, improve song quality, and incorporate additional features from Spotify data for more accurate predictions.
-- **Optimized for Linux:** The codebase is tailored and tested to work more efficiently in Linux environments.
+- **Data Cleaning:** Aligns data where song names did not match initially. The `cleaner` script also deletes records from the database if the song is not found in the directory.
+- **Format Conversion:** The `convertor` script converts audio files from MP3 to WAV for enhanced processing with torchaudio.
+- **Neural Network Processing:** Includes a class to fetch data from the database, process signals through a neural network, and predict song efficiency.
+- **Model Training:** Contains a trained model with plans for further refinement and development.
+- **Future Enhancements:** Aims to increase neural network layers, remove noise, improve song quality, and add more features from Spotify data for accurate predictions.
+- **Optimized for Linux:** Tailored and tested for efficient performance in Linux environments.
 
 ## Getting Started
 
@@ -17,8 +17,8 @@ This project is an extension of the Spotify Data Collector, focusing on advanced
 - Python 3.x
 - PyTorch
 - torchaudio
-- A Linux-based operating system for optimal performance
-- An environment compatible with CUDA for GPU acceleration (optional)
+- Linux-based operating system for optimal performance
+- CUDA-compatible environment for GPU acceleration (optional)
 
 ### Installation and Setup
 1. **Clone the repository:**
@@ -35,16 +35,21 @@ This project is an extension of the Spotify Data Collector, focusing on advanced
    ```
 
 ### Running the Application
-To run the application, use the provided scripts. For example, to convert audio files:
-```
-python cleaner.py
-```
+To run the application, use the provided scripts. For example:
+- To clean data and update the database:
+  ```
+  python cleaner.py
+  ```
+- To convert audio files from MP3 to WAV:
+  ```
+  python convertor.py
+  ```
 
 ## Usage
-The project is used to process and analyze audio files. It involves cleaning, converting, and feeding the data through neural networks to evaluate and predict song quality and efficiency.
+This project processes and analyzes audio files, involving cleaning, converting, and feeding data through neural networks to evaluate and predict song quality and efficiency.
 
 ## Contributing
-Contributions for improving and expanding the project are welcome. Please read `CONTRIBUTING.md` for details on our code of conduct and the process for submitting pull requests.
+Contributions to improve and expand the project are welcome. Please read `CONTRIBUTING.md` for details on our code of conduct and the process for submitting pull requests.
 
 ## License
 This project is licensed under the [MIT License](LICENSE.md).
