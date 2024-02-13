@@ -3,7 +3,7 @@ import torchaudio
 from torch import nn
 from torch.utils.data import DataLoader
 from urbansounddataset import UrbanSoundDataset # Replace with your actual class name
-from cnn import CNNNetwork
+from neural_network_model.cnn import CNNNetwork
 
 BATCH_SIZE = 128
 EPOCHS = 10

@@ -1,6 +1,6 @@
 import torch
 import torchaudio
-from cnn import CNNNetwork
+from neural_network_model.cnn import CNNNetwork
 from urbansounddataset import UrbanSoundDataset
 from train import AUDIO_DIR, ANNOTATIONS_FILE, SAMPLE_RATE, NUM_SAMPLES
 
