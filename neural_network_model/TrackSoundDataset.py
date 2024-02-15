@@ -9,7 +9,6 @@ import torchaudio
 ANNOTATIONS_FILE = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/test_data_100/all_spotify_data_refined_100.csv"
 AUDIO_DIR = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/test_data_100/all_spotify_data_refined_100.csv"
 
-
 class TrackSoundDataset(Dataset):
 
     def __init__(self,

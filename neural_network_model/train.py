@@ -45,11 +45,16 @@ if __name__ == "__main__":
 
     # instantiating our dataset object and create data loader
     mel_spectrogram = torchaudio.transforms.MelSpectrogram(
-        sample_rate=SAMPLE_RATE,
+        # number of sample forms
+        sample_rate=44100,
+        # This parameter specifies the number of points used in the Fast Fourier Transform // more is better
         n_fft=1024,
+        # less of it == more frames per second
         hop_length=512,
+        # mel filter more is better
         n_mels=64
     )
+    
     usd = TrackSoundDataset(ANNOTATIONS_FILE,
                             AUDIO_DIR,
                             mel_spectrogram,
