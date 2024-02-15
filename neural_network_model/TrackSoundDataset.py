@@ -6,8 +6,8 @@ import pandas as pd
 import torchaudio
 
 
-ANNOTATIONS_FILE = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/test_data_100/all_spotify_data_refined_100.csv"
-AUDIO_DIR = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/test_data_100/wav"
+ANNOTATIONS_FILE = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/all_spotify_data_output.csv"
+AUDIO_DIR = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/wav"
 
 class TrackSoundDataset(Dataset):
 
@@ -30,16 +30,15 @@ class TrackSoundDataset(Dataset):
     
     def __getitem__(self, index):
         row = self.annotations.iloc[index]
-        song_title = row['name']
-        song_title_sanitized = re.sub(r'\s*\(.*?\)\s*', ' ', song_title).strip()
+        song_title = row['music_file']
         files = os.listdir(AUDIO_DIR)
         audio_file_path = None
         for file in files:
-            if song_title_sanitized in file:
+            if song_title in file:
                 audio_file_path = os.path.join(AUDIO_DIR, file)
                 break
         if not audio_file_path:
-            raise FileNotFoundError(f"No audio file found for song title '{song_title_sanitized}'")
+            raise FileNotFoundError(f"No audio file found for song title '{song_title}'")
         signal, sr = torchaudio.load(audio_file_path)
         signal = signal.to(self.device)
         signal = self._resample_if_necessary(signal, sr)

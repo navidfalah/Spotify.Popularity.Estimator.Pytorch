@@ -8,27 +8,32 @@ from cnn import CNNNetwork
 BATCH_SIZE = 128
 EPOCHS = 10
 LEARNING_RATE = 0.001
-ANNOTATIONS_FILE = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/test_data_100/all_spotify_data_refined_100.csv"
-AUDIO_DIR = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/test_data_100/wav"
+ANNOTATIONS_FILE = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/all_spotify_data_output.csv"
+AUDIO_DIR = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/wav"
 TRAIN_OUTPUT = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/outputs/song.pth"
 SAMPLE_RATE = 44100
-NUM_SAMPLES = 105
-
+NUM_SAMPLES = 996
 
 def create_data_loader(train_data, batch_size):
     train_dataloader = DataLoader(train_data, batch_size=batch_size)
     return train_dataloader
 
 def train_single_epoch(model, data_loader, loss_fn, optimiser, device):
-
+    model.train()  # Set the model to training mode
+    total_loss = 0.0
+    num_batches = 0
     for input, target in data_loader:
-        input, target = input.to(device), target.to(device).float()
-        prediction = model(input)
-        loss = loss_fn(prediction, target.unsqueeze(1))  # Ensure target is the correct shape
+        input, target = input.to(device), target.to(device)
         optimiser.zero_grad()
+        prediction = model(input)
+        loss = loss_fn(prediction, target)
         loss.backward()
         optimiser.step()
-    print(f"loss: {loss.item()}")
+        total_loss += loss.item()
+        num_batches += 1
+    average_loss = total_loss / num_batches
+    print(f"Average loss after single epoch: {average_loss:.4f}")  # Print average loss for each epoch
+
 
 def train(model, data_loader, loss_fn, optimiser, device, epochs):
     for i in range(epochs):
@@ -44,15 +49,19 @@ if __name__ == "__main__":
         device = "cpu"
     print(f"Using {device}")
 
+    # Initializing the model
+    print("Initializing the model...")
+    cnn = CNNNetwork().to(device)
+    
     # instantiating our dataset object and create data loader
+    print("Loading and preparing the dataset...")
     mel_spectrogram = torchaudio.transforms.MelSpectrogram(
         sample_rate=44100,  # Make sure this matches your actual audio sample rate
-        n_fft=64,
-        hop_length=32,
+        n_fft=512,
+        hop_length=256,
         n_mels=64,
     )
 
-    
     usd = TrackSoundDataset(ANNOTATIONS_FILE,
                             AUDIO_DIR,
                             mel_spectrogram,
@@ -61,9 +70,17 @@ if __name__ == "__main__":
                             device)
     
     train_dataloader = create_data_loader(usd, BATCH_SIZE)
-    cnn = CNNNetwork().to(device)
+    
+    # Defining loss function and optimizer
+    print("Defining loss function and optimizer...")
     loss_fn = nn.MSELoss()  # Using Mean Squared Error Loss for regression
     optimiser = torch.optim.Adam(cnn.parameters(), lr=LEARNING_RATE)
+    
+    # Training the model
+    print("Training the model...")
     train(cnn, train_dataloader, loss_fn, optimiser, device, EPOCHS)
+    
+    # Saving the trained model
+    print("Saving the trained model...")
     torch.save(cnn.state_dict(), TRAIN_OUTPUT)
     print("Trained feed forward net saved at feedforwardnet.pth")
