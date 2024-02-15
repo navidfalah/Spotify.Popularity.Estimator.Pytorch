@@ -25,8 +25,8 @@ def train_single_epoch(model, data_loader, loss_fn, optimiser, device):
     for input, target in data_loader:
         input, target = input.to(device), target.to(device)
         optimiser.zero_grad()
-        prediction = model(input)
-        loss = loss_fn(prediction, target)
+        prediction = model(input).squeeze()  # Squeeze model output to remove singleton dimension
+        loss = loss_fn(prediction, target.float())  # Ensure target is float
         loss.backward()
         optimiser.step()
         total_loss += loss.item()
@@ -59,7 +59,7 @@ if __name__ == "__main__":
         sample_rate=44100,  # Make sure this matches your actual audio sample rate
         n_fft=512,
         hop_length=256,
-        n_mels=64,
+        n_mels=40,
     )
 
     usd = TrackSoundDataset(ANNOTATIONS_FILE,
