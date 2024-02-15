@@ -8,10 +8,10 @@ from neural_network_model.cnn import CNNNetwork
 BATCH_SIZE = 128
 EPOCHS = 10
 LEARNING_RATE = 0.001
-ANNOTATIONS_FILE = "/home/navid/Desktop/data_spotify/songs.csv"
-AUDIO_DIR = "/home/navid/Desktop/data_spotify/wav"
-SAMPLE_RATE = 964
-NUM_SAMPLES = 964
+ANNOTATIONS_FILE = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/test_data_100/all_spotify_data_refined_100.csv"
+AUDIO_DIR = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/test_data_100/all_spotify_data_refined_100.csv"
+SAMPLE_RATE = 105
+NUM_SAMPLES = 105
 
 
 def create_data_loader(train_data, batch_size):

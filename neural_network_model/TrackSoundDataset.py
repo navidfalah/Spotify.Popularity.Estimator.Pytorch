@@ -6,8 +6,9 @@ import pandas as pd
 import torchaudio
 
 
-ANNOTATIONS_FILE = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/all_spotify_data_refined_updated.csv"
-AUDIO_DIR = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/wav"
+ANNOTATIONS_FILE = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/test_data_100/all_spotify_data_refined_100.csv"
+AUDIO_DIR = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/test_data_100/all_spotify_data_refined_100.csv"
+
 
 class TrackSoundDataset(Dataset):
 
@@ -86,8 +87,8 @@ class TrackSoundDataset(Dataset):
 
 
 if __name__ == "__main__":
-    SAMPLE_RATE = 997
-    NUM_SAMPLES = 997
+    SAMPLE_RATE = 105
+    NUM_SAMPLES = 105
     if torch.cuda.is_available():
         device = "cuda"
     else:
