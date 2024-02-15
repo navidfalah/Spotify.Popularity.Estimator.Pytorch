@@ -3,13 +3,13 @@ import torchaudio
 from torch import nn
 from torch.utils.data import DataLoader
 from TrackSoundDataset import TrackSoundDataset
-from neural_network_model.cnn import CNNNetwork
+from cnn import CNNNetwork
 
 BATCH_SIZE = 128
 EPOCHS = 10
 LEARNING_RATE = 0.001
 ANNOTATIONS_FILE = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/test_data_100/all_spotify_data_refined_100.csv"
-AUDIO_DIR = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/test_data_100/all_spotify_data_refined_100.csv"
+AUDIO_DIR = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/test_data_100/wav"
 TRAIN_OUTPUT = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/outputs/song.pth"
 SAMPLE_RATE = 105
 NUM_SAMPLES = 105
