@@ -36,7 +36,7 @@ def process_music_data(csv_file_path, music_files_directory, target_column):
     music_file_names = list_music_files(music_files_directory)
     
     # Find the nearest music file name and add it to a new column
-    music_df['nearest_music_file'] = music_df.apply(lambda row: find_nearest_music_name(row[target_column], music_file_names), axis=1)
+    music_df['music_file'] = music_df.apply(lambda row: find_nearest_music_name(row[target_column], music_file_names), axis=1)
     
     # Save the updated DataFrame to a new CSV file
     updated_csv_path = csv_file_path.replace('.csv', '_updated.csv')
