@@ -11,7 +11,7 @@ LEARNING_RATE = 0.001
 ANNOTATIONS_FILE = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/test_data_100/all_spotify_data_refined_100.csv"
 AUDIO_DIR = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/test_data_100/wav"
 TRAIN_OUTPUT = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/outputs/song.pth"
-SAMPLE_RATE = 105
+SAMPLE_RATE = 44100
 NUM_SAMPLES = 105
 
 
@@ -46,14 +46,12 @@ if __name__ == "__main__":
 
     # instantiating our dataset object and create data loader
     mel_spectrogram = torchaudio.transforms.MelSpectrogram(
-        sample_rate=SAMPLE_RATE,
-        n_fft=2048,  # Increased for better frequency resolution
-        hop_length=512,  # Adjust according to the desired time resolution
-        n_mels=128,  # Increased for more detailed frequency resolution
-        power=2.0,  # The exponent for the magnitude spectrogram
+        sample_rate=44100,  # Make sure this matches your actual audio sample rate
+        n_fft=64,
+        hop_length=32,
+        n_mels=64,
     )
 
-    print(mel_spectrogram)
     
     usd = TrackSoundDataset(ANNOTATIONS_FILE,
                             AUDIO_DIR,
