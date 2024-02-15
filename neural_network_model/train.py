@@ -2,7 +2,7 @@ import torch
 import torchaudio
 from torch import nn
 from torch.utils.data import DataLoader
-from urbansounddataset import UrbanSoundDataset # Replace with your actual class name
+from TrackSoundDataset import TrackSoundDataset
 from neural_network_model.cnn import CNNNetwork
 
 BATCH_SIZE = 128
@@ -12,6 +12,7 @@ ANNOTATIONS_FILE = "/home/navid/Desktop/data_spotify/songs.csv"
 AUDIO_DIR = "/home/navid/Desktop/data_spotify/wav"
 SAMPLE_RATE = 964
 NUM_SAMPLES = 964
+
 
 def create_data_loader(train_data, batch_size):
     train_dataloader = DataLoader(train_data, batch_size=batch_size)
@@ -49,7 +50,7 @@ if __name__ == "__main__":
         hop_length=512,
         n_mels=64
     )
-    usd = UrbanSoundDataset(ANNOTATIONS_FILE,
+    usd = TrackSoundDataset(ANNOTATIONS_FILE,
                             AUDIO_DIR,
                             mel_spectrogram,
                             SAMPLE_RATE,

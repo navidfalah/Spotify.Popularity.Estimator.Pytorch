@@ -6,8 +6,8 @@ import pandas as pd
 import torchaudio
 
 
-ANNOTATIONS_FILE = "/home/navid/Desktop/data_spotify/songs.csv"
-AUDIO_DIR = "/home/navid/Desktop/data_spotify/wav"
+ANNOTATIONS_FILE = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/all_spotify_data_refined_updated.csv"
+AUDIO_DIR = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/wav"
 
 class TrackSoundDataset(Dataset):
 
@@ -47,7 +47,8 @@ class TrackSoundDataset(Dataset):
         signal = self._cut_if_necessary(signal)
         signal = self._right_pad_if_necessary(signal)
         signal = self.transformation(signal)
-        label = row['popularity']  # Replace 'label_column' with the actual column name that contains the label
+        label = row['popularity']
+        #### whatever the class backs for evey item
         return signal, label
 
     def _cut_if_necessary(self, signal):
@@ -85,8 +86,8 @@ class TrackSoundDataset(Dataset):
 
 
 if __name__ == "__main__":
-    SAMPLE_RATE = 964
-    NUM_SAMPLES = 964
+    SAMPLE_RATE = 997
+    NUM_SAMPLES = 997
     if torch.cuda.is_available():
         device = "cuda"
     else:
@@ -99,7 +100,7 @@ if __name__ == "__main__":
         hop_length=512,
         n_mels=64
     )
-    usd = UrbanSoundDataset(ANNOTATIONS_FILE,
+    usd = TrackSoundDataset(ANNOTATIONS_FILE,
                             AUDIO_DIR,
                             mel_spectrogram,
                             SAMPLE_RATE,

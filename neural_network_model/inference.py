@@ -1,7 +1,7 @@
 import torch
 import torchaudio
 from neural_network_model.cnn import CNNNetwork
-from urbansounddataset import UrbanSoundDataset
+from TrackSoundDataset import TrackSoundDataset
 from train import AUDIO_DIR, ANNOTATIONS_FILE, SAMPLE_RATE, NUM_SAMPLES
 
 def load_model(model_path):
@@ -17,7 +17,7 @@ def prepare_dataset():
         hop_length=512,
         n_mels=64
     )
-    return UrbanSoundDataset(ANNOTATIONS_FILE, AUDIO_DIR, mel_spectrogram, SAMPLE_RATE, NUM_SAMPLES, "cpu")
+    return TrackSoundDataset(ANNOTATIONS_FILE, AUDIO_DIR, mel_spectrogram, SAMPLE_RATE, NUM_SAMPLES, "cpu")
 
 def make_inference(model, dataset, index):
     input, target = dataset[index][0], dataset[index][1]
