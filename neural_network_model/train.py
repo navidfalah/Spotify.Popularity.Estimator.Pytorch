@@ -10,6 +10,7 @@ EPOCHS = 10
 LEARNING_RATE = 0.001
 ANNOTATIONS_FILE = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/test_data_100/all_spotify_data_refined_100.csv"
 AUDIO_DIR = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/test_data_100/all_spotify_data_refined_100.csv"
+TRAIN_OUTPUT = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/outputs/song.pth"
 SAMPLE_RATE = 105
 NUM_SAMPLES = 105
 
@@ -45,15 +46,14 @@ if __name__ == "__main__":
 
     # instantiating our dataset object and create data loader
     mel_spectrogram = torchaudio.transforms.MelSpectrogram(
-        # number of sample forms
-        sample_rate=44100,
-        # This parameter specifies the number of points used in the Fast Fourier Transform // more is better
-        n_fft=1024,
-        # less of it == more frames per second
-        hop_length=512,
-        # mel filter more is better
-        n_mels=64
+        sample_rate=SAMPLE_RATE,
+        n_fft=2048,  # Increased for better frequency resolution
+        hop_length=512,  # Adjust according to the desired time resolution
+        n_mels=128,  # Increased for more detailed frequency resolution
+        power=2.0,  # The exponent for the magnitude spectrogram
     )
+
+    print(mel_spectrogram)
     
     usd = TrackSoundDataset(ANNOTATIONS_FILE,
                             AUDIO_DIR,
@@ -67,5 +67,5 @@ if __name__ == "__main__":
     loss_fn = nn.MSELoss()  # Using Mean Squared Error Loss for regression
     optimiser = torch.optim.Adam(cnn.parameters(), lr=LEARNING_RATE)
     train(cnn, train_dataloader, loss_fn, optimiser, device, EPOCHS)
-    torch.save(cnn.state_dict(), "songnet.pth")
+    torch.save(cnn.state_dict(), TRAIN_OUTPUT)
     print("Trained feed forward net saved at feedforwardnet.pth")
