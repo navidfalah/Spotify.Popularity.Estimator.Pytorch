@@ -1,55 +1,53 @@
-# Audio Neural Processing for Spotify Songs
+SoundWave Neural Network Model 🌊🎶🧠
 
-## Overview
-This project extends the Spotify Data Collector, focusing on advanced signal processing of captured songs using PyTorch and torchaudio. It utilizes data and features from [Spotify Popularity Estimator Data Capture](https://github.com/navidfalah/Spotify-Popularity-Estimator-DataCapture). The goal is to preprocess audio data, apply neural network models for analysis, and predict song efficiency.
+Welcome to the SoundWave Neural Network Model project! This innovative codebase utilizes the power of Convolutional Neural Networks (CNNs) to analyze and predict the popularity of songs based on various audio features.
+What's Inside? 🧐
 
-## Features
-- **Data Cleaning:** Aligns data where song names did not match initially. The `cleaner` script also deletes records from the database if the song is not found in the directory.
-- **Format Conversion:** The `convertor` script converts audio files from MP3 to WAV for enhanced processing with torchaudio.
-- **Neural Network Processing:** Includes a class to fetch data from the database, process signals through a neural network, and predict song efficiency.
-- **Model Training:** Contains a trained model with plans for further refinement and development.
-- **Future Enhancements:** Aims to increase neural network layers, remove noise, improve song quality, and add more features from Spotify data for accurate predictions.
-- **Optimized for Linux:** Tailored and tested for efficient performance in Linux environments.
+    data_spotify: Your go-to folder containing all the Spotify song data and WAV files for model training.
+    neural_network_model: The core of our project with Python files defining our CNN and training procedures.
+    outputs: Here's where the magic happens - trained models and their outputs will be stored here.
+    utils: A collection of utility scripts to convert, clean, and manage our data.
 
-## Getting Started
+How It Works 🔍
 
-### Prerequisites
-- Python 3.x
-- PyTorch
-- torchaudio
-- Linux-based operating system for optimal performance
-- CUDA-compatible environment for GPU acceleration (optional)
+    CNN Architecture: cnn.py defines a CNN with multiple convolutional layers, ReLU activations, and pooling to extract features from audio files.
+    Data Management: TrackSoundDataset.py manages audio data, converting files to the necessary format, and fetching items for processing.
+    Training: train.py runs the training sessions, validates model performance, and logs the results.
 
-### Installation and Setup
-1. **Clone the repository:**
-   ```
-   git clone [repository link]
-   ```
-2. **Install dependencies:**
-   ```
-   pip install -r requirements.txt
-   ```
-   Dependencies include:
-   ```
-   [List of Dependencies]
-   ```
+Preparing Your Data 📊🎵
 
-### Running the Application
-To run the application, use the provided scripts. For example:
-- To clean data and update the database:
-  ```
-  python cleaner.py
-  ```
-- To convert audio files from MP3 to WAV:
-  ```
-  python convertor.py
-  ```
+The all_spotify_data_output.csv file should contain the following columns:
 
-## Usage
-This project processes and analyzes audio files, involving cleaning, converting, and feeding data through neural networks to evaluate and predict song quality and efficiency.
+    name: The title of the track.
+    popularity: The popularity score of the track on Spotify.
+    Other audio features like acousticness, danceability, energy, etc.
+    music_file: The filename of the corresponding audio file in WAV format.
 
-## Contributing
-Contributions to improve and expand the project are welcome. Please read `CONTRIBUTING.md` for details on our code of conduct and the process for submitting pull requests.
+Sample CSV Data:
 
-## License
-This project is licensed under the [MIT License](LICENSE.md).
+mathematica
+
+name, popularity, duration_ms, ..., music_file
+Higher Power, 73, 211295, ..., 1. Coldplay - Higher Power (128).wav
+
+Installation and Setup 🛠️
+
+    Clone the repository.
+    Install dependencies from requirements.txt.
+    Place your .wav files in data_spotify/wav.
+    Ensure your all_spotify_data_output.csv is in data_spotify.
+
+Usage 🚀
+
+Execute train.py to start training the model with your data. Make sure to activate your Python environment!
+Contributing 🤝
+
+Feel free to fork the project, and submit pull requests. For major changes, please open an issue first to discuss what you would like to change.
+Credits & Acknowledgements 👏
+
+    This project was inspired by the deep learning community and music enthusiasts worldwide.
+    Special thanks to the developers of PyTorch for their amazing deep learning library.
+
+License 📜
+
+Distributed under the MIT License. See LICENSE for more information.
