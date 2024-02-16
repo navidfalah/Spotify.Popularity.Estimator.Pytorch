@@ -1,6 +1,6 @@
 import torch
 import torchaudio
-from neural_network_model.cnn import CNNNetwork
+from cnn import CNNNetwork
 from TrackSoundDataset import TrackSoundDataset
 from train import AUDIO_DIR, ANNOTATIONS_FILE, SAMPLE_RATE, NUM_SAMPLES
 
@@ -12,10 +12,10 @@ def load_model(model_path):
 
 def prepare_dataset():
     mel_spectrogram = torchaudio.transforms.MelSpectrogram(
-        sample_rate=SAMPLE_RATE,
-        n_fft=1024,
-        hop_length=512,
-        n_mels=64
+        sample_rate=44100,  # Make sure this matches your actual audio sample rate
+        n_fft=512,
+        hop_length=256,
+        n_mels=40,
     )
     return TrackSoundDataset(ANNOTATIONS_FILE, AUDIO_DIR, mel_spectrogram, SAMPLE_RATE, NUM_SAMPLES, "cpu")
 
@@ -27,9 +27,9 @@ def make_inference(model, dataset, index):
     return predicted_class.item(), target
 
 if __name__ == "__main__":
-    cnn = load_model("songnet.pth")
+    cnn = load_model("/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/outputs/song.pth")
     print(cnn)
     usd = prepare_dataset()
     print(len(usd))
-    predicted, expected = make_inference(cnn, usd, 300)
+    predicted, expected = make_inference(cnn, usd, 2)
     print(f"Predicted: '{predicted}', expected: '{expected}'")
