@@ -1,14 +1,13 @@
 import os
-import re
 import torch
 from torch.utils.data import Dataset
 import pandas as pd
 import torchaudio
-from constants import ANNOTATIONS_FILE, AUDIO_DIR
+from constants import AUDIO_DIR
+import syslog
 
 
 class TrackSoundDataset(Dataset):
-
     def __init__(self,
                  annotations_file,
                  audio_dir,
@@ -22,6 +21,7 @@ class TrackSoundDataset(Dataset):
         self.transformation = transformation.to(self.device)
         self.target_sample_rate = target_sample_rate
         self.num_samples = num_samples
+        syslog.syslog(syslog.LOG_INFO, f"TrackSoundDataset initialized with annotations file {annotations_file}")
 
     def __len__(self):
         return len(self.annotations)
@@ -36,6 +36,7 @@ class TrackSoundDataset(Dataset):
                 audio_file_path = os.path.join(AUDIO_DIR, file)
                 break
         if not audio_file_path:
+            syslog.syslog(syslog.LOG_ERR, f"No audio file found for song title '{song_title}'")
             raise FileNotFoundError(f"No audio file found for song title '{song_title}'")
         signal, sr = torchaudio.load(audio_file_path)
         signal = signal.to(self.device)
@@ -45,7 +46,7 @@ class TrackSoundDataset(Dataset):
         signal = self._right_pad_if_necessary(signal)
         signal = self.transformation(signal)
         label = row['popularity']
-        #### whatever the class backs for evey item
+        syslog.syslog(syslog.LOG_INFO, f"Processed song title '{song_title}' with popularity label {label}")
         return signal, label
 
     def _cut_if_necessary(self, signal):
@@ -74,10 +75,8 @@ class TrackSoundDataset(Dataset):
 
     def _get_audio_sample_path(self, index):
         fold = f"fold{self.annotations.iloc[index, 5]}"
-        path = os.path.join(self.audio_dir, fold, self.annotations.iloc[
-            index, 0])
+        path = os.path.join(self.audio_dir, fold, self.annotations.iloc[index, 0])
         return path
 
     def _get_audio_sample_label(self, index):
         return self.annotations.iloc[index, 6]
-
