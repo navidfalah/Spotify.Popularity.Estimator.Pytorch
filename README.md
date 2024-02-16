@@ -51,6 +51,5 @@ Feel free to fork the project, and submit pull requests. For major changes, plea
 - This project was inspired by the deep learning community and music enthusiasts worldwide.
 - Special thanks to the developers of PyTorch for their amazing deep learning library.
 
-## License 📜
-
-Distributed under the MIT License. See `LICENSE` for more information.
+## License
+This project is licensed under the [MIT License](LICENSE.md).
