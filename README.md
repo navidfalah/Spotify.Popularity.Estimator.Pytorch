@@ -1,4 +1,4 @@
-# SoundWave Neural Network Model 🌊🎶🧠
+# Spotify Popularity EstimatorPytorch 🌊🎶🧠
 
 Welcome to the SoundWave Neural Network Model project! This innovative codebase utilizes the power of Convolutional Neural Networks (CNNs) to analyze and predict the popularity of songs based on various audio features.
 
@@ -15,9 +15,10 @@ Welcome to the SoundWave Neural Network Model project! This innovative codebase 
 2. **Data Management**: `TrackSoundDataset.py` manages audio data, converting files to the necessary format, and fetching items for processing.
 3. **Training**: `train.py` runs the training sessions, validates model performance, and logs the results.
 
+
 ## Preparing Your Data 📊🎵
 
-The `all_spotify_data_output.csv` file should contain the following columns:
+The `all_spotify_data_output.csv` file is populated with data obtained from a dedicated project on data capturing, available at [Spotify Popularity Estimator DataCapture](https://github.com/navidfalah/Spotify-Popularity-Estimator-DataCapture). It should contain the following columns:
 - `name`: The title of the track.
 - `popularity`: The popularity score of the track on Spotify.
 - Other audio features like `acousticness`, `danceability`, `energy`, etc.
