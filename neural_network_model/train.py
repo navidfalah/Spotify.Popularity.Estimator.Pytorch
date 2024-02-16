@@ -12,11 +12,11 @@ BATCH_SIZE, EPOCHS, LEARNING_RATE, SAMPLE_RATE, NUM_SAMPLES)
 
 
 def validate_model(model, data_loader, loss_fn, device):
-    model.eval()  # Set the model to evaluation mode
+    model.eval()
     total_loss = 0.0
     num_batches = 0
 
-    with torch.no_grad():  # Disable gradient computation
+    with torch.no_grad():
         for input_data, target in data_loader:
             input_data, target = input_data.to(device), target.to(device)
             prediction = model(input_data).squeeze()
@@ -28,21 +28,21 @@ def validate_model(model, data_loader, loss_fn, device):
 
 
 def train_single_epoch(model, data_loader, loss_fn, optimiser, device):
-    model.train()  # Set the model to training mode
+    model.train()
     total_loss = 0.0
     num_batches = 0
     for input, target in data_loader:
         input, target = input.to(device), target.to(device)
         optimiser.zero_grad()
-        prediction = model(input).squeeze()  # Squeeze model output to remove singleton dimension
-        loss = loss_fn(prediction, target.float())  # Ensure target is float
+        prediction = model(input).squeeze()
+        loss = loss_fn(prediction, target.float())
         loss.backward()
         optimiser.step()
         total_loss += loss.item()
         num_batches += 1
         syslog.syslog(syslog.LOG_INFO, f"Predicted: '{prediction}', expected: '{target}'")
     average_loss = total_loss / num_batches
-    syslog.syslog(syslog.LOG_INFO, f"Average loss after single epoch: {average_loss:.4f}")  # Print average loss for each epoch
+    syslog.syslog(syslog.LOG_INFO, f"Average loss after single epoch: {average_loss:.4f}")
 
 
 def train(model, data_loader, validation_loader, loss_fn, optimiser, device, epochs):
@@ -59,15 +59,12 @@ if __name__ == "__main__":
     else:
         device = "cpu"
     syslog.syslog(syslog.LOG_INFO, f"Using {device}")
-
-    # Initializing the model
     syslog.syslog(syslog.LOG_INFO, "Initializing the model...")
     cnn = CNNNetwork().to(device)
     
-    # instantiating our dataset object and create data loader
     syslog.syslog(syslog.LOG_INFO, "Loading and preparing the dataset...")
     mel_spectrogram = torchaudio.transforms.MelSpectrogram(
-        sample_rate=44100,  # Make sure this matches your actual audio sample rate
+        sample_rate=44100,
         n_fft=512,
         hop_length=256,
         n_mels=40,
@@ -84,24 +81,18 @@ if __name__ == "__main__":
     train_size = 796
     test_size = total_size - train_size  # This should be 200
     syslog.syslog(syslog.LOG_INFO, f"Test size: {test_size}")
-
-    # Randomly split the dataset into training and testing
     train_dataset, test_dataset = random_split(usd, [train_size, test_size])
 
-    # Create DataLoaders for both datasets
     train_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
     test_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE)
 
-    # Defining loss function and optimizer
     syslog.syslog(syslog.LOG_INFO, "Defining loss function and optimizer...")
-    loss_fn = nn.MSELoss()  # Using Mean Squared Error Loss for regression
+    loss_fn = nn.MSELoss()
     optimiser = torch.optim.Adam(cnn.parameters(), lr=LEARNING_RATE)
     
-    # Training the model
     syslog.syslog(syslog.LOG_INFO, "Training the model...")
     train(cnn, train_dataloader, test_dataloader, loss_fn, optimiser, device, EPOCHS)
     
-    # Saving the trained model
     syslog.syslog(syslog.LOG_INFO, "Saving the trained model...")
     torch.save(cnn.state_dict(), TRAIN_OUTPUT)
     syslog.syslog(syslog.LOG_INFO, "Trained feed forward net saved at feedforwardnet.pth")
