@@ -25,6 +25,31 @@ The `all_spotify_data_output.csv` file should contain the following columns:
 
 Sample CSV Data:
 
-```name, popularity, duration_ms, ..., music_file
-Higher Power, 73, 211295, ..., 1. Coldplay - Higher Power (128).wav```
+```
+name, popularity, duration_ms, ..., music_file
+Higher Power, 73, 211295, ..., 1. Coldplay - Higher Power (128).wav
+```
 
+## Installation and Setup 🛠️
+
+1. Clone the repository.
+2. Install dependencies from `requirements.txt`.
+3. Place your `.wav` files in `data_spotify/wav`.
+4. Ensure your `all_spotify_data_output.csv` is in `data_spotify`.
+
+## Usage 🚀
+
+Execute `train.py` to start training the model with your data. Make sure to activate your Python environment!
+
+## Contributing 🤝
+
+Feel free to fork the project, and submit pull requests. For major changes, please open an issue first to discuss what you would like to change.
+
+## Credits & Acknowledgements 👏
+
+- This project was inspired by the deep learning community and music enthusiasts worldwide.
+- Special thanks to the developers of PyTorch for their amazing deep learning library.
+
+## License 📜
+
+Distributed under the MIT License. See `LICENSE` for more information.
