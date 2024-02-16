@@ -27,43 +27,28 @@ class TrackSoundDataset(Dataset):
 
     def __len__(self):
         return len(self.annotations)
-        
+    
     def __getitem__(self, index):
-        # Extract information from the annotations
         row = self.annotations.iloc[index]
         song_title = row['music_file']
-        audio_file_path = os.path.join(self.audio_dir, song_title)
-        
-        if not os.path.exists(audio_file_path):
+        files = os.listdir(AUDIO_DIR)
+        audio_file_path = None
+        for file in files:
+            if song_title in file:
+                audio_file_path = os.path.join(AUDIO_DIR, file)
+                break
+        if not audio_file_path:
             raise FileNotFoundError(f"No audio file found for song title '{song_title}'")
-
-        # Load and preprocess the audio file
         signal, sr = torchaudio.load(audio_file_path)
         signal = signal.to(self.device)
-        
-        # Ensure single channel (mono)
-        if signal.shape[0] > 1:
-            signal = torch.mean(signal, dim=0, keepdim=True)
-        
-        # Resample if necessary
-        if sr != self.target_sample_rate:
-            resampler = torchaudio.transforms.Resample(orig_freq=sr, new_freq=self.target_sample_rate)
-            signal = resampler(signal)
-
-        # Apply the transformation (e.g., Mel Spectrogram)
+        signal = self._resample_if_necessary(signal, sr)
+        signal = self._mix_down_if_necessary(signal)
+        signal = self._cut_if_necessary(signal)
+        signal = self._right_pad_if_necessary(signal)
         signal = self.transformation(signal)
-        
-        # Pad the spectrogram to ensure consistent size
-        if signal.size(-1) < self.num_samples:
-            # Calculate the amount of padding needed
-            pad_amount = self.num_samples - signal.size(-1)
-            signal = torch.nn.functional.pad(signal, (0, pad_amount), 'constant', 0)
-
-        # Optionally, cut or further process the signal as needed
-
         label = row['popularity']
+        #### whatever the class backs for evey item
         return signal, label
-
 
     def _cut_if_necessary(self, signal):
         if signal.shape[1] > self.num_samples:
