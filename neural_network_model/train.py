@@ -5,16 +5,10 @@ from torch.utils.data import DataLoader
 from TrackSoundDataset import TrackSoundDataset
 from cnn import CNNNetwork
 from torch.utils.data import random_split
+from constants import(
+ANNOTATIONS_FILE, AUDIO_DIR, TRAIN_OUTPUT,
+BATCH_SIZE, EPOCHS, LEARNING_RATE, SAMPLE_RATE, NUM_SAMPLES)
 
-BATCH_SIZE = 128
-EPOCHS = 10
-LEARNING_RATE = 0.001
-ANNOTATIONS_FILE = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/all_spotify_data_output.csv"
-AUDIO_DIR = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/wav"
-TRAIN_OUTPUT = "/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/outputs/song.pth"
-ANNOTATIONS_TEST = '/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/all_spotify_data_output_test.csv'
-SAMPLE_RATE = 44100
-NUM_SAMPLES = 996
 
 def validate_model(model, data_loader, loss_fn, device):
     model.eval()  # Set the model to evaluation mode
