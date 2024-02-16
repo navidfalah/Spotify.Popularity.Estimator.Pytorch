@@ -1,4 +1,4 @@
-# Spotify Popularity EstimatorPytorch 🌊🎶🧠
+# Spotify Popularity Estimator Pytorch 🌊🎶🧠
 
 Welcome to the SoundWave Neural Network Model project! This innovative codebase utilizes the power of Convolutional Neural Networks (CNNs) to analyze and predict the popularity of songs based on various audio features.
 
