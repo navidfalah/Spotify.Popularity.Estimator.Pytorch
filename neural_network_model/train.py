@@ -6,10 +6,10 @@ from TrackSoundDataset import TrackSoundDataset
 from cnn import CNNNetwork
 from torch.utils.data import random_split
 import syslog
-from constants import(
-ANNOTATIONS_FILE, AUDIO_DIR, TRAIN_OUTPUT,
-BATCH_SIZE, EPOCHS, LEARNING_RATE, SAMPLE_RATE, NUM_SAMPLES)
-
+from constants import (
+    ANNOTATIONS_FILE, AUDIO_DIR, TRAIN_OUTPUT,
+    BATCH_SIZE, EPOCHS, LEARNING_RATE, SAMPLE_RATE, NUM_SAMPLES
+)
 
 def validate_model(model, data_loader, loss_fn, device):
     model.eval()
@@ -17,24 +17,23 @@ def validate_model(model, data_loader, loss_fn, device):
     num_batches = 0
 
     with torch.no_grad():
-        for input_data, target in data_loader:
-            input_data, target = input_data.to(device), target.to(device)
-            prediction = model(input_data).squeeze()
+        for input_data, metadata, target in data_loader:
+            input_data, metadata, target = input_data.to(device), metadata.to(device), target.to(device)
+            prediction = model(input_data, metadata).squeeze()  # Adjusted to pass metadata
             loss = loss_fn(prediction, target.float())
             total_loss += loss.item()
             num_batches += 1
     average_loss = total_loss / num_batches
     return average_loss
 
-
 def train_single_epoch(model, data_loader, loss_fn, optimiser, device):
     model.train()
     total_loss = 0.0
     num_batches = 0
-    for input, target in data_loader:
-        input, target = input.to(device), target.to(device)
+    for input_data, metadata, target in data_loader:
+        input_data, metadata, target = input_data.to(device), metadata.to(device), target.to(device)
         optimiser.zero_grad()
-        prediction = model(input).squeeze()
+        prediction = model(input_data, metadata).squeeze()  # Adjusted to pass metadata
         loss = loss_fn(prediction, target.float())
         loss.backward()
         optimiser.step()
@@ -43,7 +42,6 @@ def train_single_epoch(model, data_loader, loss_fn, optimiser, device):
         syslog.syslog(syslog.LOG_INFO, f"Predicted: '{prediction}', expected: '{target}'")
     average_loss = total_loss / num_batches
     syslog.syslog(syslog.LOG_INFO, f"Average loss after single epoch: {average_loss:.4f}")
-
 
 def train(model, data_loader, validation_loader, loss_fn, optimiser, device, epochs):
     for i in range(epochs):
@@ -59,28 +57,33 @@ if __name__ == "__main__":
     else:
         device = "cpu"
     syslog.syslog(syslog.LOG_INFO, f"Using {device}")
+    
+    # Determine the dimension of metadata
+    metadata_dim = 15  # Adjust this based on actual metadata used
+
     syslog.syslog(syslog.LOG_INFO, "Initializing the model...")
-    cnn = CNNNetwork().to(device)
+    cnn = CNNNetwork(metadata_dim=metadata_dim).to(device)  # Adjusted to include metadata dimension
     
     syslog.syslog(syslog.LOG_INFO, "Loading and preparing the dataset...")
     mel_spectrogram = torchaudio.transforms.MelSpectrogram(
-        sample_rate=44100,
+        sample_rate=SAMPLE_RATE,
         n_fft=512,
         hop_length=256,
         n_mels=40,
     )
 
-    usd = TrackSoundDataset(ANNOTATIONS_FILE,
-                            AUDIO_DIR,
-                            mel_spectrogram,
-                            SAMPLE_RATE,
-                            NUM_SAMPLES,
-                            device)
+    usd = TrackSoundDataset(
+        ANNOTATIONS_FILE,
+        AUDIO_DIR,
+        mel_spectrogram,
+        SAMPLE_RATE,
+        NUM_SAMPLES,
+        device
+    )
     
     total_size = len(usd)
-    train_size = 796
-    test_size = total_size - train_size  # This should be 200
-    syslog.syslog(syslog.LOG_INFO, f"Test size: {test_size}")
+    train_size = int(0.8 * total_size)  # Example: 80% of data for training
+    test_size = total_size - train_size  # Remaining for testing
     train_dataset, test_dataset = random_split(usd, [train_size, test_size])
 
     train_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
@@ -95,4 +98,4 @@ if __name__ == "__main__":
     
     syslog.syslog(syslog.LOG_INFO, "Saving the trained model...")
     torch.save(cnn.state_dict(), TRAIN_OUTPUT)
-    syslog.syslog(syslog.LOG_INFO, "Trained feed forward net saved at feedforwardnet.pth")
+    syslog.syslog(syslog.LOG_INFO, "Trained model saved at " + TRAIN_OUTPUT)

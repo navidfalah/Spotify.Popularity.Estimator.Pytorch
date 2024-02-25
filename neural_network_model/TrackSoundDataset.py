@@ -1,20 +1,12 @@
 import os
-import torch
-from torch.utils.data import Dataset
 import pandas as pd
+import torch
 import torchaudio
-from constants import AUDIO_DIR
+from torch.utils.data import Dataset
 import syslog
 
-
 class TrackSoundDataset(Dataset):
-    def __init__(self,
-                 annotations_file,
-                 audio_dir,
-                 transformation,
-                 target_sample_rate,
-                 num_samples,
-                 device):
+    def __init__(self, annotations_file, audio_dir, transformation, target_sample_rate, num_samples, device):
         self.annotations = pd.read_csv(annotations_file)
         self.audio_dir = audio_dir
         self.device = device
@@ -29,15 +21,7 @@ class TrackSoundDataset(Dataset):
     def __getitem__(self, index):
         row = self.annotations.iloc[index]
         song_title = row['music_file']
-        files = os.listdir(AUDIO_DIR)
-        audio_file_path = None
-        for file in files:
-            if song_title in file:
-                audio_file_path = os.path.join(AUDIO_DIR, file)
-                break
-        if not audio_file_path:
-            syslog.syslog(syslog.LOG_ERR, f"No audio file found for song title '{song_title}'")
-            raise FileNotFoundError(f"No audio file found for song title '{song_title}'")
+        audio_file_path = self._find_audio_file(song_title)
         signal, sr = torchaudio.load(audio_file_path)
         signal = signal.to(self.device)
         signal = self._resample_if_necessary(signal, sr)
@@ -45,9 +29,30 @@ class TrackSoundDataset(Dataset):
         signal = self._cut_if_necessary(signal)
         signal = self._right_pad_if_necessary(signal)
         signal = self.transformation(signal)
+        
+        metadata_fields = [
+            'duration_ms', 'acousticness', 'danceability', 'energy', 'instrumentalness',
+            'key', 'liveness', 'loudness', 'mode', 'speechiness', 'tempo',
+            'time_signature', 'valence', 'artist_popularity', 'artist_followers'
+        ]
+
+        # Extract metadata values for the specified fields
+        metadata_values = row[metadata_fields].values.astype(float)
+
+        # Convert the NumPy array into a PyTorch tensor and move it to the specified device
+        metadata_tensor = torch.tensor(metadata_values, dtype=torch.float).to(self.device)
+        
         label = row['popularity']
         syslog.syslog(syslog.LOG_INFO, f"Processed song title '{song_title}' with popularity label {label}")
-        return signal, label
+        return signal, metadata_tensor, label
+
+    def _find_audio_file(self, song_title):
+        files = os.listdir(self.audio_dir)
+        for file in files:
+            if song_title in file:
+                return os.path.join(self.audio_dir, file)
+        syslog.syslog(syslog.LOG_ERR, f"No audio file found for song title '{song_title}'")
+        raise FileNotFoundError(f"No audio file found for song title '{song_title}'")
 
     def _cut_if_necessary(self, signal):
         if signal.shape[1] > self.num_samples:
@@ -72,11 +77,3 @@ class TrackSoundDataset(Dataset):
         if signal.shape[0] > 1:
             signal = torch.mean(signal, dim=0, keepdim=True)
         return signal
-
-    def _get_audio_sample_path(self, index):
-        fold = f"fold{self.annotations.iloc[index, 5]}"
-        path = os.path.join(self.audio_dir, fold, self.annotations.iloc[index, 0])
-        return path
-
-    def _get_audio_sample_label(self, index):
-        return self.annotations.iloc[index, 6]
