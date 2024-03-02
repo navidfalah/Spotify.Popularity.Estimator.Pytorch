@@ -43,7 +43,7 @@ class TrackSoundDataset(Dataset):
         metadata_tensor = torch.tensor(metadata_values, dtype=torch.float).to(self.device)
         
         label = row['popularity']
-        syslog.syslog(syslog.LOG_INFO, f"Processed song title '{song_title}' with popularity label {label}")
+        # syslog.syslog(syslog.LOG_INFO, f"Processed song title '{song_title}' with popularity label {label}")
         return signal, metadata_tensor, label
 
     def _find_audio_file(self, song_title):

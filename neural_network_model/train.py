@@ -6,25 +6,57 @@ from TrackSoundDataset import TrackSoundDataset
 from cnn import CNNNetwork
 from torch.utils.data import random_split
 import syslog
+from sklearn.metrics import r2_score, mean_absolute_error
+import numpy as np
 from constants import (
     ANNOTATIONS_FILE, AUDIO_DIR, TRAIN_OUTPUT,
     BATCH_SIZE, EPOCHS, LEARNING_RATE, SAMPLE_RATE, NUM_SAMPLES
 )
+s c
+class EarlyStopping:
+    """Early stops the training if validation loss doesn't improve after a given patience."""
+    def __init__(self, patience=7, verbose=False, delta=0):
+        self.patience = patience
+        self.verbose = verbose
+        self.counter = 0
+        self.best_loss = None
+        self.early_stop = False
+        self.delta = delta
+
+    def __call__(self, val_loss):
+        if self.best_loss is None:
+            self.best_loss = val_loss
+        elif val_loss > self.best_loss - self.delta:
+            self.counter += 1
+            if self.verbose:
+                print(f'EarlyStopping counter: {self.counter} out of {self.patience}')
+            if self.counter >= self.patience:
+                self.early_stop = True
+        else:
+            self.best_loss = val_loss
+            self.counter = 0
 
 def validate_model(model, data_loader, loss_fn, device):
     model.eval()
     total_loss = 0.0
     num_batches = 0
+    all_predictions = []
+    all_targets = []
 
     with torch.no_grad():
         for input_data, metadata, target in data_loader:
             input_data, metadata, target = input_data.to(device), metadata.to(device), target.to(device)
-            prediction = model(input_data, metadata).squeeze()  # Adjusted to pass metadata
+            prediction = model(input_data, metadata).squeeze()
             loss = loss_fn(prediction, target.float())
             total_loss += loss.item()
             num_batches += 1
+            all_predictions.extend(prediction.cpu().numpy())
+            all_targets.extend(target.cpu().numpy())
+
     average_loss = total_loss / num_batches
-    return average_loss
+    mae = mean_absolute_error(all_targets, all_predictions)
+    r2 = r2_score(all_targets, all_predictions)
+    return average_loss, mae, r2
 
 def train_single_epoch(model, data_loader, loss_fn, optimiser, device):
     model.train()
@@ -33,57 +65,48 @@ def train_single_epoch(model, data_loader, loss_fn, optimiser, device):
     for input_data, metadata, target in data_loader:
         input_data, metadata, target = input_data.to(device), metadata.to(device), target.to(device)
         optimiser.zero_grad()
-        prediction = model(input_data, metadata).squeeze()  # Adjusted to pass metadata
+        prediction = model(input_data, metadata).squeeze()
         loss = loss_fn(prediction, target.float())
         loss.backward()
         optimiser.step()
         total_loss += loss.item()
         num_batches += 1
-        syslog.syslog(syslog.LOG_INFO, f"Predicted: '{prediction}', expected: '{target}'")
     average_loss = total_loss / num_batches
-    syslog.syslog(syslog.LOG_INFO, f"Average loss after single epoch: {average_loss:.4f}")
+    print(f"Training loss: {average_loss:.4f}")
 
-def train(model, data_loader, validation_loader, loss_fn, optimiser, device, epochs):
-    for i in range(epochs):
-        syslog.syslog(syslog.LOG_INFO, f"Epoch {i+1}")
+def train(model, data_loader, validation_loader, loss_fn, optimiser, device, epochs, early_stopping_patience=10):
+    early_stopping = EarlyStopping(patience=early_stopping_patience, verbose=True)
+    
+    for epoch in range(epochs):
+        syslog.syslog(syslog.LOG_INFO, f"Epoch {epoch+1}/{epochs}")
         train_single_epoch(model, data_loader, loss_fn, optimiser, device)
-        validation_loss = validate_model(model, validation_loader, loss_fn, device)
-        syslog.syslog(syslog.LOG_INFO, f"Validation loss after epoch {i+1}: {validation_loss:.4f}")
+        validation_loss, mae, r2 = validate_model(model, validation_loader, loss_fn, device)
+        syslog.syslog(syslog.LOG_INFO, f"Validation Loss: {validation_loss:.4f}, MAE: {mae:.4f}, R²: {r2:.4f}")
+        
+        early_stopping(validation_loss)
+        if early_stopping.early_stop:
+            syslog.syslog(syslog.LOG_INFO, "Early stopping")
+            break
+
     syslog.syslog(syslog.LOG_INFO, "Finished training")
 
 if __name__ == "__main__":
-    if torch.cuda.is_available():
-        device = "cuda"
-    else:
-        device = "cpu"
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     syslog.syslog(syslog.LOG_INFO, f"Using {device}")
     
-    # Determine the dimension of metadata
-    metadata_dim = 15  # Adjust this based on actual metadata used
+    metadata_dim = 15  # Adjust based on actual metadata used
 
     syslog.syslog(syslog.LOG_INFO, "Initializing the model...")
-    cnn = CNNNetwork(metadata_dim=metadata_dim).to(device)  # Adjusted to include metadata dimension
+    cnn = CNNNetwork(metadata_dim=metadata_dim).to(device)
     
     syslog.syslog(syslog.LOG_INFO, "Loading and preparing the dataset...")
-    mel_spectrogram = torchaudio.transforms.MelSpectrogram(
-        sample_rate=SAMPLE_RATE,
-        n_fft=512,
-        hop_length=256,
-        n_mels=40,
-    )
+    mel_spectrogram = torchaudio.transforms.MelSpectrogram(sample_rate=SAMPLE_RATE, n_fft=512, hop_length=256, n_mels=40)
 
-    usd = TrackSoundDataset(
-        ANNOTATIONS_FILE,
-        AUDIO_DIR,
-        mel_spectrogram,
-        SAMPLE_RATE,
-        NUM_SAMPLES,
-        device
-    )
+    usd = TrackSoundDataset(ANNOTATIONS_FILE, AUDIO_DIR, mel_spectrogram, SAMPLE_RATE, NUM_SAMPLES, device)
     
     total_size = len(usd)
-    train_size = int(0.8 * total_size)  # Example: 80% of data for training
-    test_size = total_size - train_size  # Remaining for testing
+    train_size = int(0.8 * total_size)
+    test_size = total_size - train_size
     train_dataset, test_dataset = random_split(usd, [train_size, test_size])
 
     train_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
@@ -94,7 +117,7 @@ if __name__ == "__main__":
     optimiser = torch.optim.Adam(cnn.parameters(), lr=LEARNING_RATE)
     
     syslog.syslog(syslog.LOG_INFO, "Training the model...")
-    train(cnn, train_dataloader, test_dataloader, loss_fn, optimiser, device, EPOCHS)
+    train(cnn, train_dataloader, test_dataloader, loss_fn, optimiser, device, EPOCHS, early_stopping_patience=10)
     
     syslog.syslog(syslog.LOG_INFO, "Saving the trained model...")
     torch.save(cnn.state_dict(), TRAIN_OUTPUT)
