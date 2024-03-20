@@ -44,7 +44,7 @@ class TrackSoundDataset(Dataset):
         
         label = row['popularity']
         # syslog.syslog(syslog.LOG_INFO, f"Processed song title '{song_title}' with popularity label {label}")
-        return signal, metadata_tensor, label
+        return signal, metadata_tensor, label, song_title
 
     def _find_audio_file(self, song_title):
         files = os.listdir(self.audio_dir)
