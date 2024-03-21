@@ -44,8 +44,8 @@ def process_music_data(csv_file_path, music_files_directory, target_column):
     print(f"Updated CSV saved to {updated_csv_path}")
 
 # Update these paths and column name as necessary
-csv_file_path = '/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/all_spotify_data_refined.csv'
-music_files_directory = '/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/wav_new'
+csv_file_path = '/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/spotify_data.csv'
+music_files_directory = '/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/wav'
 target_column = 'name'  # Adjust based on the actual column name
 
 process_music_data(csv_file_path, music_files_directory, target_column)

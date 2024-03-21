@@ -95,7 +95,7 @@ if __name__ == "__main__":
     device = "cuda" if torch.cuda.is_available() else "cpu"
     syslog.syslog(syslog.LOG_INFO, f"Using {device}")
 
-    metadata_dim = 15  # Adjust based on actual metadata used
+    metadata_dim = 13  # Adjust based on actual metadata used
     cnn = CNNNetwork(metadata_dim=metadata_dim).to(device)
     
     mel_spectrogram = torchaudio.transforms.MelSpectrogram(sample_rate=SAMPLE_RATE, n_fft=512, hop_length=256, n_mels=40)

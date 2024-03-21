@@ -32,7 +32,7 @@ class TrackSoundDataset(Dataset):
         
         metadata_fields = [
             'duration_ms', 'acousticness', 'danceability', 'energy', 'instrumentalness',
-            'key', 'liveness', 'loudness', 'mode', 'speechiness', 'tempo',
+            'liveness', 'loudness', 'speechiness', 'tempo',
             'time_signature', 'valence', 'artist_popularity', 'artist_followers'
         ]
 

@@ -2,7 +2,7 @@ from pydub import AudioSegment
 import os
 
 # Directory containing the MP3 files
-input_directory = '/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/mp3'
+input_directory = '/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/new_mp3'
 
 # Directory where the WAV files will be saved
 output_directory = '/home/navid/Desktop/Spotify-Popularity-Estimator-Pytorch/data_spotify/wav_new'
