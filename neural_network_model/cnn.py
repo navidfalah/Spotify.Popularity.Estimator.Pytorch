@@ -25,7 +25,7 @@ class CNNNetwork(nn.Module):
             nn.ReLU()
         )
         self.fc_layers = nn.Sequential(
-            nn.Linear(128 * 19 * 1 + 64, 512),
+            nn.Linear(7360, 512),  # Adjusted input size
             nn.ReLU(),
             nn.Linear(512, 1)
         )
